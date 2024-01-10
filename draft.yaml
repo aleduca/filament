@@ -1,0 +1,41 @@
+models:
+  Post:
+    title: string:100
+    slug: string:150
+    content: text
+    user_id: id unsigned foreign ondelete:cascade
+    tag_id: id unsigned foreign nullable
+    created_at: timestamp
+    updated_at: timestamp onupdate:current_timestamp
+    timestamps: false
+    relationships:
+      belongsTo: User
+      hasMany: Tag
+
+  Tag:
+    tag_name: string:100
+    created_at: timestamp
+    updated_at: timestamp onupdate:current_timestamp
+    timestamps: false
+    relationships:
+      belongsToMany: Post
+
+  Comment:
+    content: text
+    user_id: id unsigned foreign ondelete:cascade
+    post_id: id unsigned foreign ondelete:cascade
+    created_at: timestamp
+    updated_at: timestamp onupdate:current_timestamp
+    timestamps: false
+    relationships:
+      belongsTo: User,Post
+
+  Reply:
+    content: text
+    user_id: id unsigned foreign ondelete:cascade
+    comment_id: id unsigned foreign ondelete:cascade
+    created_at: timestamp
+    updated_at: timestamp onupdate:current_timestamp
+    timestamps: false
+    relationships:
+      belongsTo: User,Comment
