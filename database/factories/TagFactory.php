@@ -23,7 +23,7 @@ class TagFactory extends Factory
     $faker = \Faker\Factory::create();
     $faker->addProvider(new \Bezhanov\Faker\Provider\Commerce($faker));
     return [
-      'tag_name' => strtolower($faker->unique()->department()),
+      'tag_name' => strtolower($faker->unique()->department),
       'created_at' => $this->faker->dateTime(),
       'updated_at' => $this->faker->dateTime(),
     ];

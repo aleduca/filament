@@ -18,6 +18,8 @@ use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\TextInputColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 
 class UserResource extends Resource
@@ -107,8 +109,9 @@ class UserResource extends Resource
   {
     return $table
       ->columns([
-        TextColumn::make('name')
+        TextInputColumn::make('name')
           ->label('Nome')
+          ->rules(['required'])
           ->sortable()
           ->searchable(),
 
@@ -119,9 +122,8 @@ class UserResource extends Resource
           ->sortable()
           ->label('Email'),
 
-        IconColumn::make('is_admin')
-          ->label('Admin?')
-          ->boolean(),
+        ToggleColumn::make('is_admin')
+          ->label('Admin?'),
 
         TextColumn::make('phone')
           ->label('Telefone')
@@ -130,6 +132,10 @@ class UserResource extends Resource
         TextColumn::make('comments_count')
           ->label('Comentários')
           ->sortable()
+          ->badge()
+          ->color(function ($state): string {
+            return ($state >= 2) ? 'success' : 'danger';
+          })
           ->counts('comments'),
 
         TextColumn::make('created_at')

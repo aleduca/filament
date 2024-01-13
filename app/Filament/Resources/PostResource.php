@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PostResource\Pages;
 use App\Filament\Resources\PostResource\RelationManagers;
+use App\Models\Category;
 use App\Models\Post;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
@@ -17,7 +18,9 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -114,22 +117,39 @@ class PostResource extends Resource
       ->columns([
         TextColumn::make('title')
           ->searchable()
-          ->sortable()
-          ->limit(20),
+          ->wrap()
+          ->description(function (Post $record) {
+            return Str::of($record->content)->limit(60);
+          })
+          ->sortable(),
 
-        IconColumn::make('is_published')
-          ->sortable()
-          ->boolean(),
+        TextColumn::make('tags.tag_name')
+          ->badge()
+          ->color(function ($state) {
+            if (in_array($state, ['baby', 'garden'])) {
+              return 'success';
+            }
+          })
+          ->label('Tags'),
+
+        ToggleColumn::make('is_published')
+          ->sortable(),
 
         TextColumn::make('user.name')
           ->label('Author')
           ->sortable()
           ->searchable(),
 
-        TextColumn::make('category.name')
+        SelectColumn::make('category_id')
           ->label('Category')
-          ->sortable()
-          ->searchable()
+          ->options(Category::pluck('name', 'id'))
+
+        // TextColumn::make('category.name')
+        //   ->label('Category')
+        //   ->sortable()
+        //   ->searchable()
+      ])->striped()->paginated([
+        10, 25, 50, 100, 'all'
       ])
       ->filters([
         //

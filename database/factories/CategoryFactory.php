@@ -19,7 +19,7 @@ class CategoryFactory extends Factory
     $faker = \Faker\Factory::create();
     $faker->addProvider(new \Bezhanov\Faker\Provider\Commerce($faker));
     return [
-      'name' => $faker->unique()->department,
+      'name' => $faker->unique()->category,
     ];
   }
 }
