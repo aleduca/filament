@@ -23,6 +23,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
 
@@ -32,6 +33,28 @@ class PostResource extends Resource
 
   protected static ?string $navigationIcon = 'heroicon-o-document-text';
   protected static ?int $navigationSort = 2;
+
+  protected static ?string $recordTitleAttribute = 'title';
+
+  public static function getGloballySearchableAttributes(): array
+  {
+    return ['title', 'slug', 'user.name', 'category.name'];
+  }
+
+  public static function getGlobalSearchEloquentQuery(): Builder
+  {
+    return parent::getGlobalSearchEloquentQuery()->with(['user', 'category']);
+  }
+
+  protected static int $globalSearchResultsLimit = 10;
+
+  public static function getGlobalSearchResultDetails(Model $record): array
+  {
+    return [
+      'Author' => $record->user->name,
+      'Category' => $record->category->name,
+    ];
+  }
 
   public static function form(Form $form): Form
   {

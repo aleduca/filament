@@ -21,6 +21,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Model;
 
 class UserResource extends Resource
 {
@@ -31,6 +33,21 @@ class UserResource extends Resource
   protected static ?string $modelLabel = 'Usuários';
 
   protected static ?int $navigationSort = 1;
+
+  protected static ?string $recordTitleAttribute = 'name';
+
+
+  // public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
+  // {
+  //   return 'Nome do user: ' . $record->name;
+  // }
+
+  protected static int $globalSearchResultsLimit = 10;
+
+  public static function getGloballySearchableAttributes(): array
+  {
+    return ['name', 'email'];
+  }
 
   public static function form(Form $form): Form
   {
