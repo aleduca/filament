@@ -13,6 +13,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\IconPosition;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\IconColumn;
@@ -20,6 +21,9 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
@@ -30,7 +34,7 @@ class UserResource extends Resource
   // protected static ?string $slug = '/users/index';
 
   protected static ?string $navigationIcon = 'heroicon-o-users';
-  protected static ?string $modelLabel = 'Usuários';
+  protected static ?string $navigationLabel = 'Usuários';
 
   protected static ?int $navigationSort = 1;
 
@@ -125,10 +129,13 @@ class UserResource extends Resource
   public static function table(Table $table): Table
   {
     return $table
+      ->filtersTriggerAction(function ($action) {
+        return $action->button()->label('Filtrar');
+      })
+      ->filtersFormWidth(MaxWidth::ExtraLarge)
       ->columns([
-        TextInputColumn::make('name')
+        TextColumn::make('name')
           ->label('Nome')
-          ->rules(['required'])
           ->sortable()
           ->searchable(),
 
@@ -150,6 +157,7 @@ class UserResource extends Resource
           ->label('Comentários')
           ->sortable()
           ->badge()
+          ->icon('heroicon-o-chat-bubble-bottom-center-text')
           ->color(function ($state): string {
             return ($state >= 2) ? 'success' : 'danger';
           })
@@ -164,8 +172,15 @@ class UserResource extends Resource
           ->toggleable(isToggledHiddenByDefault: true),
       ])
       ->filters([
-        //
-      ])
+        TernaryFilter::make('is_admin'),
+
+        SelectFilter::make('id')
+          ->label('Users')
+          ->multiple()
+          ->options(User::pluck('name', 'id'))
+
+
+      ], layout: FiltersLayout::AboveContentCollapsible)
       ->actions([
         ActionGroup::make([
           Tables\Actions\EditAction::make()->color('primary')->icon('heroicon-o-pencil')->label('Editar usuário'),

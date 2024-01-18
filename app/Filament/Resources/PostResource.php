@@ -15,12 +15,22 @@ use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\QueryBuilder;
+use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
+use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
+use Filament\Tables\Filters\QueryBuilder\Constraints\SelectConstraint;
+use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -31,10 +41,24 @@ class PostResource extends Resource
 {
   protected static ?string $model = Post::class;
 
-  protected static ?string $navigationIcon = 'heroicon-o-document-text';
+  // protected static ?string $navigationIcon = 'heroicon-o-document-text';
   protected static ?int $navigationSort = 2;
 
+  // protected static bool $shouldRegisterNavigation = false;
+
+  protected static ?string $navigationGroup = 'Posts';
+
   protected static ?string $recordTitleAttribute = 'title';
+
+  public static function getNavigationBadge(): ?string
+  {
+    return static::getModel()::where('is_published', false)->count() . ' unpublished';
+  }
+
+  public static function getNavigationBadgeColor(): string|array|null
+  {
+    return static::getModel()::where('is_published', false)->count() > 10 ? 'warning' : 'success';
+  }
 
   public static function getGloballySearchableAttributes(): array
   {
@@ -137,6 +161,10 @@ class PostResource extends Resource
   public static function table(Table $table): Table
   {
     return $table
+      ->filtersTriggerAction(function ($action) {
+        return $action->button()->label('Filtrar Posts');
+      })
+      ->filtersFormWidth(MaxWidth::ExtraLarge)
       ->columns([
         TextColumn::make('title')
           ->searchable()
@@ -175,8 +203,20 @@ class PostResource extends Resource
         10, 25, 50, 100, 'all'
       ])
       ->filters([
-        //
-      ])
+        SelectFilter::make('user_id')
+          ->label('Author')
+          ->searchable()
+          ->preload()
+          ->multiple()
+          ->relationship('user', 'name'),
+
+        SelectFilter::make('category_id')
+          ->label('Category')
+          ->searchable()
+          ->preload()
+          ->multiple()
+          ->relationship('category', 'name'),
+      ], layout: FiltersLayout::AboveContent)
       ->actions([
         ActionGroup::make([
           Tables\Actions\EditAction::make()->color('primary')->icon('heroicon-o-pencil')->label('Editar Post'),

@@ -2,11 +2,15 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Resources\PostResource;
 use Filament\Enums\ThemeMode;
 use Filament\FontProviders\LocalFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\MenuItem;
+use Filament\Navigation\NavigationGroup;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -33,6 +37,30 @@ class AdminPanelProvider extends PanelProvider
       ->path('admin')
       ->login()
       ->profile()
+      ->navigationGroups([
+        NavigationGroup::make()
+          ->label('Posts')
+          ->icon('heroicon-o-clipboard-document-list')
+          ->collapsible(true),
+      ])
+      ->navigationItems([
+        NavigationItem::make('Analytics')
+          ->url('https://filament.pirsch.io', shouldOpenInNewTab: true)
+          // ->icon('heroicon-o-presentation-chart-line')
+          ->sort(1)
+          ->group('Posts')
+      ])
+      ->userMenuItems([
+        MenuItem::make()
+          ->label('Post')
+          ->url(fn (): string => PostResource::getUrl())
+          ->icon('heroicon-o-document-text'),
+        MenuItem::make()
+          ->label('Google')
+          ->url('http://google.com', shouldOpenInNewTab: true)
+          ->icon('heroicon-o-magnifying-glass-circle'),
+      ])
+      ->breadcrumbs()
       ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
       ->brandLogo(asset('images/cfs.svg'))
       ->brandLogoHeight('3rem')
