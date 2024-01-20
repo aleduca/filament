@@ -6,6 +6,7 @@ use App\Filament\Resources\PostResource\Pages;
 use App\Filament\Resources\PostResource\RelationManagers;
 use App\Models\Category;
 use App\Models\Post;
+use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
@@ -25,12 +26,12 @@ use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\QueryBuilder;
+use Filament\Tables\Filters\QueryBuilder\Constraints\BooleanConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Filters\QueryBuilder\Constraints\SelectConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -216,6 +217,53 @@ class PostResource extends Resource
           ->preload()
           ->multiple()
           ->relationship('category', 'name'),
+
+        QueryBuilder::make()
+          ->constraints([
+            TextConstraint::make('title')
+              ->label('Title')
+              ->icon('heroicon-o-document-text'),
+            TextConstraint::make('author')
+              ->relationship('user', 'name')
+              ->label('Author')
+              ->icon('heroicon-o-user'),
+            BooleanConstraint::make('is_published')
+              ->label('Published')
+              ->icon('heroicon-o-check-circle'),
+            BooleanConstraint::make('is_admin')
+              ->relationship('user', 'is_admin')
+              ->label('Is Admin?')
+              ->icon('heroicon-o-check-circle'),
+            SelectConstraint::make('email')
+              ->relationship('user', 'email')
+              ->icon('heroicon-o-envelope-open')
+              ->options(User::pluck('email', 'email')->toArray())
+              ->multiple(),
+            RelationshipConstraint::make('tags')
+              ->label('Tags')
+              ->icon('heroicon-o-tag'),
+            RelationshipConstraint::make('user')
+              ->label('Author')
+              ->icon('heroicon-o-user')
+              ->selectable(
+                IsRelatedToOperator::make()
+                  ->titleAttribute('name')
+                  ->preload()
+                  ->searchable()
+                  ->multiple(),
+              ),
+            RelationshipConstraint::make('category')
+              ->label('category')
+              ->icon('heroicon-o-tag')
+              ->selectable(
+                IsRelatedToOperator::make()
+                  ->titleAttribute('name')
+                  ->preload()
+                  ->searchable()
+                  ->multiple(),
+              ),
+          ])
+
       ], layout: FiltersLayout::AboveContent)
       ->actions([
         ActionGroup::make([

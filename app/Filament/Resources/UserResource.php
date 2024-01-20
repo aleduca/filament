@@ -22,6 +22,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\TextInputColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\QueryBuilder;
+use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
@@ -177,10 +179,21 @@ class UserResource extends Resource
         SelectFilter::make('id')
           ->label('Users')
           ->multiple()
-          ->options(User::pluck('name', 'id'))
+          ->options(User::pluck('name', 'id')),
 
+        QueryBuilder::make()
+          ->constraints([
+            TextConstraint::make('name')
+              ->label('Nome')
+              ->icon('heroicon-o-user'),
 
-      ], layout: FiltersLayout::AboveContentCollapsible)
+            TextConstraint::make('email_verified_at')
+              ->label('Email Verified?')
+              ->icon('heroicon-o-envelope-open')
+              ->nullable(),
+          ])
+
+      ], layout: FiltersLayout::AboveContent)
       ->actions([
         ActionGroup::make([
           Tables\Actions\EditAction::make()->color('primary')->icon('heroicon-o-pencil')->label('Editar usuário'),
