@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Exports\PostExporter;
 use App\Filament\Resources\PostResource\Pages;
 use App\Filament\Resources\PostResource\RelationManagers;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
+use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
@@ -19,6 +21,8 @@ use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
+use Filament\Tables\Actions\ExportAction;
+use Filament\Tables\Actions\ExportBulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -265,6 +269,14 @@ class PostResource extends Resource
           ])
 
       ], layout: FiltersLayout::AboveContent)
+      ->headerActions([
+        ExportAction::make()
+          ->exporter(PostExporter::class)
+          ->formats([
+            ExportFormat::Xlsx
+          ])
+          ->icon('heroicon-o-arrow-down-on-square')
+      ])
       ->actions([
         ActionGroup::make([
           Tables\Actions\EditAction::make()->color('primary')->icon('heroicon-o-pencil')->label('Editar Post'),
@@ -274,6 +286,8 @@ class PostResource extends Resource
       ->bulkActions([
         Tables\Actions\BulkActionGroup::make([
           Tables\Actions\DeleteBulkAction::make(),
+          ExportBulkAction::make()
+            ->exporter(PostExporter::class)
         ]),
       ]);
   }

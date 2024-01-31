@@ -2,8 +2,11 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Exports\UserExporter;
 use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
+use Filament\Actions\Exports\Enums\ExportFormat;
+use Filament\Actions\Exports\Models\Export;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Tabs;
@@ -19,6 +22,8 @@ use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Actions\ExportAction;
+use Filament\Tables\Actions\ExportBulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -197,6 +202,17 @@ class UserResource extends Resource
           ])
 
       ], layout: FiltersLayout::AboveContent)
+      ->headerActions([
+        ExportAction::make()
+          ->exporter(UserExporter::class)
+          ->formats([
+            ExportFormat::Xlsx,
+            ExportFormat::Csv,
+          ])
+          ->label('Report')
+          ->fileName(fn (Export $export): string => "users-{$export->getKey()}")
+          ->icon('heroicon-o-arrow-down-on-square')
+      ])
       ->actions([
         ActionGroup::make([
           Tables\Actions\EditAction::make()->color('primary')->icon('heroicon-o-pencil')->label('Editar usuário'),
@@ -248,7 +264,9 @@ class UserResource extends Resource
                 $record->is_admin = !$record->is_admin;
                 $record->save();
               });
-            })
+            }),
+          ExportBulkAction::make()
+            ->exporter(UserExporter::class)
         ]),
       ]);
   }
