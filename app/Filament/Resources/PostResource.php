@@ -8,6 +8,7 @@ use App\Filament\Resources\PostResource\RelationManagers;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\User;
+use DanHarrin\LivewireRateLimiting\Tests\Component;
 use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
@@ -17,6 +18,11 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\Group;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\Section as ComponentsSection;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
@@ -279,8 +285,7 @@ class PostResource extends Resource
       ])
       ->actions([
         ActionGroup::make([
-          Tables\Actions\EditAction::make()->color('primary')->icon('heroicon-o-pencil')->label('Editar Post'),
-          Tables\Actions\DeleteAction::make()->color('danger')->icon('heroicon-o-trash')->label('Deletar Post'),
+          Tables\Actions\ViewAction::make()->color('warning')->icon('heroicon-o-eye')->label('Ver Post'),
         ]),
       ])
       ->bulkActions([
@@ -299,12 +304,71 @@ class PostResource extends Resource
     ];
   }
 
+  public static function infolist(Infolist $infolist): Infolist
+  {
+    return $infolist
+      ->schema([
+        ComponentsSection::make('Post Data')
+          ->icon('heroicon-o-document-text')
+          ->description('Post Data')
+          ->schema([
+            TextEntry::make('title')
+              ->label('Title'),
+
+            TextEntry::make('slug')
+              ->label('Slug'),
+
+            TextEntry::make('category.name')
+              ->label('Category')
+              ->getStateUsing(function ($record) {
+                return strtoupper($record->category->name);
+              }),
+
+            TextEntry::make('tags.tag_name')
+              ->label('Tags')
+              ->badge(),
+
+            TextEntry::make('is_published')
+              ->label('Is Published')
+              ->getStateUsing(function ($record) {
+                return $record->is_published ? 'Yes' : 'No';
+              })
+          ])->columns(3),
+
+        ComponentsSection::make('Author Information')
+          ->icon('heroicon-o-user')
+          ->description('Author Information')
+          ->schema([
+            ImageEntry::make('user.avatar')
+              ->circular()
+              ->label('Avatar'),
+
+            TextEntry::make('user.name')
+              ->label('Author'),
+          ])->columns(2),
+
+        ComponentsSection::make('Thumbnail and Content')
+          ->icon('heroicon-o-photo')
+          ->description('Thumbnail and Content')
+          ->columns(2)
+          ->schema([
+            ImageEntry::make('thumbnail')
+              ->label('Thumbnail'),
+
+            TextEntry::make('content')->html()
+              ->label('Content')
+              ->words(30)
+          ])
+      ]);
+  }
+
   public static function getPages(): array
   {
     return [
       'index' => Pages\ListPosts::route('/'),
       'create' => Pages\CreatePost::route('/create'),
-      'edit' => Pages\EditPost::route('/{record}/edit'),
+      'view' => Pages\ViewPost::route('/{record}'),
+      // 'edit' => Pages\EditPost::route('/{record}/edit'),
     ];
   }
 }
