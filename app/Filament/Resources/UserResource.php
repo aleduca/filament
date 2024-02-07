@@ -4,11 +4,15 @@ namespace App\Filament\Resources;
 
 use App\Filament\Exports\UserExporter;
 use App\Filament\Resources\UserResource\Pages;
+use App\Mail\DemoEmail;
+use App\Mail\DemoMail;
 use App\Models\User;
 use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Actions\Exports\Models\Export;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\TextInput;
@@ -37,6 +41,7 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Mail;
 
 class UserResource extends Resource
 {
@@ -203,6 +208,30 @@ class UserResource extends Resource
 
       ], layout: FiltersLayout::AboveContent)
       ->headerActions([
+        Action::make('Send email')
+          ->icon('heroicon-o-envelope-open')
+          ->modalDescription('Enviar email para usuário')
+          ->form([
+            Select::make('id')
+              ->label('Usuário')
+              ->options(User::pluck('name', 'id'))
+              ->required()
+              ->rules(['required']),
+            TextInput::make('subject')
+              ->label('Assunto')
+              ->required()
+              ->rules(['required'])
+              ->placeholder('Assunto'),
+
+            RichEditor::make('message')
+              ->required()
+              ->label('Mensagem')
+              ->rules(['required'])
+              ->placeholder('Mensagem'),
+          ])->action(function (array $data) {
+            $user = static::getModel()::find($data['id']);
+            $user->sendEmail($data);
+          }),
         ExportAction::make()
           ->exporter(UserExporter::class)
           ->formats([
@@ -222,6 +251,23 @@ class UserResource extends Resource
             ->color('primary')
             ->icon('heroicon-o-document-text')
             ->label('Ver usuário'),
+          Action::make('Send Email')
+            ->icon('heroicon-o-envelope-open')
+            ->form([
+              TextInput::make('subject')
+                ->label('Assunto')
+                ->required()
+                ->rules(['required'])
+                ->placeholder('Assunto'),
+
+              RichEditor::make('message')
+                ->required()
+                ->label('Mensagem')
+                ->rules(['required'])
+                ->placeholder('Mensagem'),
+            ])->action(function (array $data, User $record) {
+              $record->sendEmail($data);
+            }),
           Action::make('is_admin')
             ->label(function (User $record) {
               return $record->is_admin ? 'Remover admin' : 'Tornar admin';

@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Category>
@@ -18,8 +19,10 @@ class CategoryFactory extends Factory
   {
     $faker = \Faker\Factory::create();
     $faker->addProvider(new \Bezhanov\Faker\Provider\Commerce($faker));
+    $name = $faker->unique()->category;
     return [
-      'name' => $faker->unique()->category,
+      'name' => $name,
+      'slug' => Str::slug($name),
     ];
   }
 }

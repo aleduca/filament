@@ -343,8 +343,33 @@ class PostResource extends Resource
               ->circular()
               ->label('Avatar'),
 
-            TextEntry::make('user.name')
-              ->label('Author'),
+            Group::make([
+              TextEntry::make('user.name')
+                ->icon('heroicon-o-user')
+                ->label('Author'),
+              TextEntry::make('user.email')
+                ->icon('heroicon-o-envelope-open')
+                ->label('Email'),
+
+              TextEntry::make('user.phone')
+                ->icon('heroicon-o-phone')
+                ->label('Phone'),
+              TextEntry::make('user.is_admin')
+                ->label('Is Admin?')
+                ->color(function ($record) {
+                  return $record->user->is_admin ? 'success' : 'danger';
+                })
+                ->icon(function ($record) {
+                  return $record->is_admin ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle';
+                })
+                ->iconColor(function ($record) {
+                  return $record->is_admin ? 'success' : 'danger';
+                })
+                ->getStateUsing(function ($record) {
+                  return $record->user->is_admin ? 'Yes' : 'No';
+                }),
+            ])->columns(2),
+
           ])->columns(2),
 
         ComponentsSection::make('Thumbnail and Content')

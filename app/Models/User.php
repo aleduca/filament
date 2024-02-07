@@ -4,13 +4,17 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Mail\DemoEmail;
+use App\Mail\DemoMail;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Models\Contracts\HasName;
+use Filament\Notifications\Notification;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements FilamentUser, HasAvatar, HasName
@@ -79,5 +83,25 @@ class User extends Authenticatable implements FilamentUser, HasAvatar, HasName
   public function getFilamentName(): string
   {
     return $this->name;
+  }
+
+  public function sendEmail(array $data)
+  {
+    try {
+      Mail::to($this->email)->send(new DemoMail($data, $this));
+      Notification::make()
+        ->success()
+        ->duration(3000)
+        ->title('Email enviado para ' . $this->name)
+        ->body('Email enviado para usuário')
+        ->send();
+    } catch (\Throwable $th) {
+      Notification::make()
+        ->danger()
+        ->duration(3000)
+        ->title('Erro ao enviar email')
+        ->body('Erro ao enviar email para usuário')
+        ->send();
+    }
   }
 }
