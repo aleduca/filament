@@ -32,6 +32,8 @@ class UserFactory extends Factory
       'avatar' => 'https://randomuser.me/api/portraits/' . fake()->randomElement(['women', 'men']) . '/' . rand(1, 100) . '.jpg',
       'password' => static::$password ??= Hash::make('123'),
       'remember_token' => Str::random(10),
+      'created_at' => $this->faker->dateTime(),
+      'updated_at' => $this->faker->dateTime(),
     ];
   }
 

@@ -10,6 +10,7 @@
     "require": {
         "php": "^8.1",
         "filament/filament": "^3.2",
+        "flowframe/laravel-trend": "^0.1.5",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
@@ -17,6 +18,7 @@
         "mbezhanov/faker-provider-collection": "^2.0"
     },
     "require-dev": {
+        "barryvdh/laravel-debugbar": "^3.9",
         "fakerphp/faker": "^1.9.1",
         "laravel-shift/blueprint": "^2.9",
         "laravel/breeze": "^1.27",
